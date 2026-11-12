@@ -1,0 +1,8 @@
+.root { -fx-font-family: "Segoe UI"; }
+
+.panel-lateral { -fx-background-color: #1e2327; }
+.panel-lateral .label { -fx-text-fill: #e6e7e6; }
+.panel-lateral .titulo { -fx-font-size: 18px; -fx-font-weight: bold; }
+
+.zona-mapa { -fx-background-color: #14181b; }
+.zona-mapa .label { -fx-text-fill: #8a949c; }
