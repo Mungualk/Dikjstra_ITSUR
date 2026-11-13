@@ -8,6 +8,7 @@ package com.example.dikjstra;
  *   new Edificio("C", "Biblioteca", "Horario 8-18", 700, 450)
  *       .conColor("#2ecc71")
  *       .conIcono("/ICONOS/libro.png")
+ *       .conImagen("/IMAGENES/biblioteca.jpg")   // foto que se ve en la tarjeta al hacer clic
  *       .conTamano(90, 50);
  */
 public class Edificio {
@@ -18,6 +19,7 @@ public class Edificio {
     private double y;
 
     private String color = null;   // null = color por defecto del CSS
+    private String imagen = null;  // foto de la tarjeta de info, ej. "/IMAGENES/biblioteca.jpg"
     private String icono = null;   // ruta dentro de resources, ej. "/ICONOS/libro.png"
     private double ancho = 70;     // tamaño del bloque en el mapa CSS
     private double alto = 45;
@@ -33,6 +35,7 @@ public class Edificio {
     // ---- Configuración encadenable ----
     public Edificio conColor(String colorCss) { this.color = colorCss; return this; }
     public Edificio conIcono(String ruta)     { this.icono = ruta; return this; }
+    public Edificio conImagen(String ruta)    { this.imagen = ruta; return this; }
     public Edificio conTamano(double ancho, double alto) {
         this.ancho = ancho;
         this.alto = alto;
@@ -47,6 +50,7 @@ public class Edificio {
     public double y() { return y; }
     public String color() { return color; }
     public String icono() { return icono; }
+    public String imagen() { return imagen; }
     public double ancho() { return ancho; }
     public double alto() { return alto; }
 
