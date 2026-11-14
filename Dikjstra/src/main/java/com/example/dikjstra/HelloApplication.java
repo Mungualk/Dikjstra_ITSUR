@@ -33,6 +33,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.control.CheckBox;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class HelloApplication extends Application {
 
@@ -107,7 +109,8 @@ public class HelloApplication extends Application {
     private final StringBuilder tecleado = new StringBuilder();
     private long ultimaTecla = 0;
 
-    private MapaView mapa;                          // null si la imagen no se pudo cargar
+    private MapaView mapa;
+    private RedRutas red;                           // el grafo + Dijkstra (null si no cargó el mapa)// null si la imagen no se pudo cargar
 
     @Override
     public void start(Stage stage) {
@@ -359,12 +362,21 @@ public class HelloApplication extends Application {
     }
 
     /** Se llama cada vez que cambia el origen o el destino. Aquí conectas tu Dijkstra. */
+    /** Se llama cada vez que cambia el origen o el destino. */
     private void alCambiarOrigenDestino() {
-        if (origen != null && destino != null) {
-            // Ejemplo:
-            // List<String> camino = tuDijkstra(origen.id(), destino.id());
-            // mostrarRutaReal(camino, metros);
+        if (red == null || origen == null || destino == null) {
+            limpiarRutaReal();
+            return;
         }
+
+        Optional<RedRutas.Ruta> ruta = red.calcular(origen.id(), destino.id());
+        if (ruta.isEmpty()) {
+            limpiarRutaReal();
+            lblRuta.setText("No hay camino entre " + origen.nombre() + " y " + destino.nombre());
+            return;
+        }
+
+        mostrarRutaReal(ruta.get().ids(), ruta.get().metros());
     }
 
     /** Pequeño "no" visual: el botón se mueve de lado a lado. */
@@ -387,7 +399,13 @@ public class HelloApplication extends Application {
         lblDistancia.getStyleClass().add("distancia-real");
         ocultar(lblDistancia);
 
-        VBox tarjetaReal = new VBox(8, titulo, crearBotonesOrigenDestino(), lblRuta, lblDistancia);
+        CheckBox chkGrafo = new CheckBox("Mostrar conexiones (depuración)");
+        chkGrafo.setStyle("-fx-text-fill: #cccccc;");
+        chkGrafo.setOnAction(ev -> {
+            if (mapa != null) mapa.mostrarGrafo(chkGrafo.isSelected());
+        });
+
+        VBox tarjetaReal = new VBox(8, titulo, crearBotonesOrigenDestino(), lblRuta, lblDistancia, chkGrafo);
         tarjetaReal.getStyleClass().addAll("tarjeta", "tarjeta-real");
         tarjetaReal.setPadding(new Insets(12));
 
@@ -748,7 +766,16 @@ public class HelloApplication extends Application {
             return zona;
         }
 
-        mapa = new MapaView(imagen, crearEdificios(), this::mostrarInfo);
+        List<Edificio> edificios = crearEdificios();
+        red = new RedRutas(edificios, Conexiones.TODAS);
+        mapa = new MapaView(imagen, edificios, this::mostrarInfo);
+
+        mapa.setConexiones(Conexiones.TODAS);
+
+        List<String> aislados = red.idsInalcanzables();
+        if (!aislados.isEmpty()) {
+            System.err.println("Nodos sin conexión a la red: " + aislados);
+        }
         zona.getChildren().add(mapa);
 
         Node boton = crearBotonCapa(imagen);
