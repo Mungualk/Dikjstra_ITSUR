@@ -14,9 +14,16 @@
 .panel-lateral .subtitulo { -fx-font-size: 14px; -fx-text-fill: #a6a6a6; }
 /* Título del panel: texto grande con la línea azul Holo debajo */
 .panel-lateral .titulo-panel {
-    -fx-font-size: 20px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 8 2;
+    -fx-border-color: transparent transparent #0090e7 transparent;
+    -fx-border-width: 0 0 2 0;
+
+}
+
+.panel-lateral .titulo-panel {
     -fx-padding: 0 0 8 2;
     -fx-border-color: transparent transparent #0090e7 transparent;
     -fx-border-width: 0 0 2 0;

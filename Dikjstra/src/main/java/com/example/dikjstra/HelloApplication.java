@@ -44,6 +44,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
+import javafx.util.Duration;
+
 public class HelloApplication extends Application {
 
     /** El panel izquierdo mide como máximo 420 px y se puede encoger hasta el mínimo. */
@@ -390,22 +404,32 @@ public class HelloApplication extends Application {
         ).play();
     }
 
+
     private VBox crearPanelLateral() {
         // --- Ruta real ---
         Label titulo = new Label("Ruta más corta");
         titulo.getStyleClass().add("titulo");
+
         lblRuta.setWrapText(true);
         lblRuta.getStyleClass().add("texto-real");
         lblDistancia.getStyleClass().add("distancia-real");
         ocultar(lblDistancia);
 
-        CheckBox chkGrafo = new CheckBox("Mostrar conexiones (depuración)");
+        CheckBox chkGrafo = new CheckBox("Mostrar conexiones");
         chkGrafo.setStyle("-fx-text-fill: #cccccc;");
         chkGrafo.setOnAction(ev -> {
             if (mapa != null) mapa.mostrarGrafo(chkGrafo.isSelected());
         });
 
-        VBox tarjetaReal = new VBox(8, titulo, crearBotonesOrigenDestino(), lblRuta, lblDistancia, chkGrafo);
+        VBox tarjetaReal = new VBox(
+                8,
+                titulo,
+                crearBotonesOrigenDestino(),
+                lblRuta,
+                lblDistancia,
+                chkGrafo
+        );
+
         tarjetaReal.getStyleClass().addAll("tarjeta", "tarjeta-real");
         tarjetaReal.setPadding(new Insets(12));
 
@@ -413,43 +437,78 @@ public class HelloApplication extends Application {
         lblNombre.getStyleClass().add("nombre-edificio");
         lblDescripcion.setWrapText(true);
         lblCoordenadas.getStyleClass().add("coordenadas");
-        ocultar(lblCoordenadas);                 // solo aparece en modo mapa CSS (ver MOSTRAR_COORDENADAS)
-        // Foto con marco: se ajusta al ancho de la tarjeta (con alto máximo) y queda centrada
+        ocultar(lblCoordenadas);
+
+        // Foto con marco
         imgEdificio.setPreserveRatio(true);
         imgEdificio.setSmooth(true);
-        imgEdificio.fitWidthProperty().bind(tarjetaInfo.widthProperty().subtract(42));   // 24 padding tarjeta + 18 del marco
+
+        imgEdificio.fitWidthProperty().bind(
+                tarjetaInfo.widthProperty().subtract(42)
+        );
+
         imgEdificio.setFitHeight(ALTO_MAX_IMAGEN);
 
         brilloFoto.getStyleClass().add("brillo-foto");
         brilloFoto.setMouseTransparent(true);
-        brilloFoto.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);   // que cubra toda la foto
+        brilloFoto.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
         marcoFoto.getStyleClass().add("marco-foto");
         marco.getStyleClass().add("marco-imagen");
         marco.setMaxWidth(Region.USE_PREF_SIZE);
+
         marcoImagen.setAlignment(Pos.CENTER);
         ocultar(marcoImagen);
 
-        tarjetaInfo.getChildren().addAll(marcoImagen, lblNombre, lblCoordenadas, lblDescripcion);
+        tarjetaInfo.getChildren().addAll(
+                marcoImagen,
+                lblNombre,
+                lblCoordenadas,
+                lblDescripcion
+        );
+
         tarjetaInfo.getStyleClass().add("tarjeta");
         tarjetaInfo.setPadding(new Insets(12));
         ocultar(tarjetaInfo);
 
-        // Espacio flexible: empuja el contenido hacia arriba
+        // --- Espacio flexible ---
         Region espacio = new Region();
         VBox.setVgrow(espacio, Priority.ALWAYS);
 
-        // Título del panel
-        Label tituloPanel = new Label("User View");
+        // --- Título del panel ---
+        TextFlow tituloPanel = new TextFlow();
         tituloPanel.getStyleClass().add("titulo-panel");
-        tituloPanel.setMaxWidth(Double.MAX_VALUE);     // que la línea azul de abajo cubra todo el ancho
 
-        VBox panel = new VBox(12, tituloPanel, tarjetaReal, crearSimuladorRuta(), new Separator(),
-                tarjetaInfo, espacio);
+        Text inicio = new Text("Rutas en el ");
+        inicio.setFill(Color.WHITE);
+        inicio.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        tituloPanel.getChildren().add(inicio);
+
+        Text fin = new Text(" (Algoritmo de Dijkstra)");
+        fin.setFill(Color.WHITE);
+        fin.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        tituloPanel.getChildren().add(fin);
+        tituloPanel.setMaxWidth(Double.MAX_VALUE);
+
+        // --- Panel completo ---
+        VBox panel = new VBox(
+                12,
+                tituloPanel,
+                tarjetaReal,
+                new Separator(),
+                tarjetaInfo,
+                espacio
+        );
+
         panel.setPadding(new Insets(14));
         panel.setMinWidth(ANCHO_MIN_PANEL);
         panel.getStyleClass().add("panel-lateral");
+
         return panel;
     }
+
 
     /**
      * Pone el panel dentro de un ScrollPane: barra vertical y horizontal que aparecen solo cuando

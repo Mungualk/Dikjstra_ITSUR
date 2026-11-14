@@ -11,20 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Une el mapa (Edificio, con coordenadas en píxeles) con el algoritmo (Grafo/Dijkstra).
- * Se construye UNA vez al iniciar la app y luego se le piden rutas.
- */
 public class RedRutas
 {
     /**
-     * Cuántos metros mide un píxel de la imagen original (1172 x 896).
-     * Se obtiene midiendo la barra de escala de la captura: metros que indica / píxeles que mide.
-     * PROVISIONAL: cambia este valor cuando midas la barra.
+     imagen original (1172 x 896).
      */
-    public static final double METROS_POR_PIXEL = 0.25;
+    public static final double METROS_POR_PIXEL = 0.2732;
 
-    /** Resultado listo para el front: ids en orden y distancia total en metros. */
     public record Ruta(List<String> ids, double metros) {}
 
     private final Grafo grafo = new Grafo();
@@ -60,7 +53,6 @@ public class RedRutas
         }
     }
 
-    /** Ruta más corta entre dos ids, o vacío si no hay camino. */
     public Optional<Ruta> calcular(String idOrigen, String idDestino)
     {
         ResRuta r = dijkstra.calcular(new Nodo(idOrigen), new Nodo(idDestino));
@@ -73,7 +65,6 @@ public class RedRutas
         return Optional.of(new Ruta(ids, r.distancia()));
     }
 
-    /** Ids a los que NO se puede llegar desde el primer edificio. Lo ideal es que esté vacía. */
     public List<String> idsInalcanzables()
     {
         List<String> aislados = new ArrayList<>();
