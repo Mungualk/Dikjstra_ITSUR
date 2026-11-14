@@ -140,11 +140,6 @@ public class HelloApplication extends Application {
         // mostrarRutaReal(List.of("L", "A", "G", "F", "I"), 842.6);
     }
 
-    /**
-     * AQUÍ AÑADES / EDITAS EDIFICIOS.
-     * x e y son píxeles de la imagen ORIGINAL itsur.jpeg.
-     * Opcional por edificio: .conColor("#hex")  .conIcono("/ICONOS/archivo.png")  .conImagen("/IMAGENES/foto.jpg")  .conTamano(ancho, alto)
-     */
     private static final String colorRuta = "#a77bff";
     private List<Edificio> crearEdificios() {
         return List.of(
