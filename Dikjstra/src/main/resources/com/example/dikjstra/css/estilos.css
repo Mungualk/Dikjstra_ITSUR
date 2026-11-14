@@ -1,0 +1,490 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -color-marcador: rgb(175, 40, 40);   /* color por defecto de los nodos */
+}
+
+/* ---------- Panel lateral estilo Holo Dark ---------- */
+.panel-lateral {
+    -fx-background-color: linear-gradient(to bottom, #191919 0%, #111111 100%);
+    -fx-border-color: #2b2b2b;
+    -fx-border-width: 0 1 0 0;
+}
+.panel-lateral .label { -fx-text-fill: #f1f1f1; }
+.panel-lateral .titulo { -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #ffffff; }
+.panel-lateral .subtitulo { -fx-font-size: 14px; -fx-text-fill: #a6a6a6; }
+/* Título del panel: texto grande con la línea azul Holo debajo */
+.panel-lateral .titulo-panel {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 8 2;
+    -fx-border-color: transparent transparent #0090e7 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.panel-lateral .nombre-edificio { -fx-font-size: 15px; -fx-font-weight: bold; }
+
+.zona-mapa {
+    -fx-background-color: linear-gradient(to bottom, #0d0d0d 0%, #050505 100%);
+}
+.zona-mapa .label { -fx-text-fill: #a6a6a6; }
+
+/* ---------- Switch estilo Holo ICS ---------- */
+.switch {
+    -fx-pref-width: 52;
+    -fx-pref-height: 26;
+    -fx-min-width: 52;
+    -fx-min-height: 26;
+    -fx-padding: 3;
+    -fx-background-color: linear-gradient(to bottom, #111111 0%, #222222 100%);
+    -fx-background-insets: 0;
+    -fx-background-radius: 3;
+    -fx-border-color: #333333;
+    -fx-border-radius: 3;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+}
+.switch:selected {
+    -fx-background-color: linear-gradient(to bottom, #0090e7 0%, #0077bc 100%);
+    -fx-border-color: #00bfff;
+    -fx-alignment: center-right;
+}
+
+/* ---------- Nodos: esferas estilo render 3D antiguo (Phong, oscuras) ---------- */
+.marcador {
+    -fx-fill: radial-gradient(center 36% 30%, radius 78%,
+              derive(-color-marcador, 20%) 0%,
+              derive(-color-marcador, -15%) 20%,
+              derive(-color-marcador, -40%) 48%,
+              derive(-color-marcador, -66%) 78%,
+              derive(-color-marcador, -88%) 100%);
+    -fx-stroke: derive(-color-marcador, -90%);
+    -fx-stroke-width: 0.5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 14, 0.05, 3, 5);
+}
+/* luz tenue rebotada abajo */
+.esfera-rebote {
+    -fx-fill: radial-gradient(center 66% 104%, radius 55%,
+              rgba(180, 200, 230, 0.20) 0%, rgba(180, 200, 230, 0) 100%);
+}
+/* halo suave del brillo especular */
+.esfera-brillo {
+    -fx-fill: radial-gradient(center 50% 50%, radius 60%,
+              rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 100%);
+}
+/* punto especular, pequeño y duro (típico de Phong) */
+.esfera-punto { -fx-fill: rgba(255, 255, 255, 0.80); }
+
+/* Aura del nodo elegido como origen (verde) o destino (rojo): brillo discreto */
+.aura          { -fx-fill: transparent; -fx-stroke-width: 3; }
+.aura-origen   { -fx-stroke: rgba(46, 204, 113, 0.70); }
+.aura-destino  { -fx-stroke: rgba(231, 76, 60, 0.70); }
+
+.marcador:hover {
+    -fx-stroke: #c99a00;
+    -fx-stroke-width: 1.8;
+    -fx-effect: dropshadow(gaussian, rgba(220, 160, 0, 0.8), 10, 0.4, 0, 0);
+}
+.marcador.seleccionado {
+    -fx-stroke: #d9b84a;
+    -fx-stroke-width: 2.5;
+    -fx-effect: dropshadow(gaussian, rgba(217, 184, 74, 0.7), 9, 0.4, 0, 0);
+}
+
+/* ---------- Mapa estilo Holo Dark con profundidad 3D ---------- */
+.mapa-css {
+    -fx-background-color: #080808;
+}
+
+.rejilla {
+    -fx-stroke: rgba(0, 144, 231, 0.08);
+    -fx-stroke-width: 1;
+}
+.vegetacion {
+    -fx-fill: rgba(50, 90, 70, 0.35);
+}
+
+/* Calles (con relieve e inversión de profundidad estilo UI 4.0) */
+.calle-borde {
+    -fx-stroke: #1c2226;
+    -fx-stroke-width: 24;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.calle {
+    -fx-stroke: #090b0d;
+    -fx-stroke-width: 18;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.sendero-borde {
+    -fx-stroke: #161c1f;
+    -fx-stroke-width: 11;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.sendero {
+    -fx-stroke: #06090a;
+    -fx-stroke-width: 7;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+
+/* Plataformas planas con sombras interiores simuladas */
+.estacionamiento {
+    -fx-fill: #0c0f12;
+    -fx-stroke: #2b3b42;
+    -fx-stroke-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0, 0, 1);
+}
+.linea-estac       { -fx-stroke: rgba(0, 144, 231, 0.35); -fx-stroke-width: 1.2; }
+.linea-estac-fina  { -fx-stroke: rgba(0, 144, 231, 0.15); -fx-stroke-width: 0.8; }
+.cancha {
+    -fx-fill: #0a0e11;
+    -fx-stroke: #334c57;
+    -fx-stroke-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.2), 10, 0.3, 0, 0);
+}
+.cancha-linea {
+    -fx-fill: transparent;
+    -fx-stroke: rgba(0, 144, 231, 0.4);
+    -fx-stroke-width: 1.2;
+}
+
+/* Edificios 3D estilo Holográfico Android 4.0 (Caras texturizadas con gradiente e iluminación cenital) */
+.cara-luz {
+    -fx-fill: linear-gradient(to bottom, #233742 0%, #152229 100%);
+    -fx-stroke: #456d80;
+    -fx-stroke-width: 1;
+}
+.cara-sombra {
+    -fx-fill: linear-gradient(to bottom, #0f171c 0%, #080c0f 100%);
+    -fx-stroke: #22353d;
+    -fx-stroke-width: 1;
+}
+.techo {
+    -fx-fill: linear-gradient(to bottom, #1b2830 0%, #10181d 100%);
+    -fx-stroke: #5a8ea6;
+    -fx-stroke-width: 1.8;
+    -fx-stroke-line-join: round;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 14, 0.3, 0, 4);
+}
+.techo-detalle {
+    -fx-fill: transparent;
+    -fx-stroke: rgba(90, 142, 166, 0.5);
+    -fx-stroke-width: 1;
+}
+.mapa-css .etiqueta-edificio {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(20, 20, 20, 0.92);
+    -fx-background-radius: 3;
+    -fx-border-color: #0090e7;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-padding: 4 10 4 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 8, 0.4, 0, 3);
+}
+
+/* ---------- Marco de la foto del edificio (biselado Holo + borde azul) ---------- */
+.panel-lateral .marco-imagen {
+    -fx-background-color:
+        #050505,
+        linear-gradient(to bottom right, #5a5a5a 0%, #262626 45%, #0f0f0f 100%),
+        linear-gradient(to bottom, #1a1a1a 0%, #0c0c0c 100%);
+    -fx-background-insets: 0, 1, 4;
+    -fx-background-radius: 7, 6, 4;
+    -fx-padding: 7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0.1, 0, 3);
+}
+.panel-lateral .marco-foto {
+    -fx-background-color: #000000;
+    -fx-border-color: rgba(0, 144, 231, 0.65);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.35), 8, 0.15, 0, 0);
+}
+/* reflejo suave en la parte de arriba, como el cristal de un visor antiguo */
+.panel-lateral .brillo-foto {
+    -fx-background-color: linear-gradient(to bottom, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0) 42%);
+}
+
+/* ---------- Tarjetas flotantes estilo Holo (Paneles oscuros con bordes sutiles) ---------- */
+.panel-lateral .tarjeta {
+    -fx-background-color: linear-gradient(to bottom, #222222 0%, #181818 100%);
+    -fx-background-radius: 4;
+    -fx-border-color: #333333;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
+}
+
+/* ---------- Tarjeta desplegable de ajustes (Acordeón Holo) ---------- */
+.tarjeta-ajustes {
+    -fx-text-fill: #f1f1f1;
+    -fx-font-weight: bold;
+}
+.tarjeta-ajustes > .title {
+    -fx-background-color: linear-gradient(to bottom, #262626 0%, #1c1c1c 100%);
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-border-color: #383838;
+    -fx-border-radius: 4;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.tarjeta-ajustes:expanded > .title {
+    -fx-background-radius: 4 4 0 0;
+}
+.tarjeta-ajustes > .title > .text {
+    -fx-fill: #f1f1f1;
+}
+.tarjeta-ajustes > .title > .arrow-button > .arrow {
+    -fx-background-color: #0090e7;
+}
+.tarjeta-ajustes > .content {
+    -fx-background-color: #141414;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0 0 4 4;
+    -fx-border-color: #2b2b2b;
+    -fx-padding: 14;
+}
+.tarjeta-ajustes .label {
+    -fx-font-weight: normal;
+}
+
+/* ---------- Rutas: tubo azul estilo render 3D antiguo ---------- */
+.tubo-sombra {
+    -fx-stroke: rgba(0, 0, 0, 0.70);
+    -fx-stroke-width: 10;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.tubo-borde {
+    -fx-stroke-width: 9.5;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.tubo-cuerpo {
+    -fx-stroke-width: 7.5;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.tubo-oscuro {
+    -fx-stroke-width: 4.5;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+}
+.tubo-rebote {
+    -fx-stroke-width: 1.2;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+    -fx-opacity: 0.35;
+}
+.tubo-luz {
+    -fx-stroke-width: 2.6;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+    -fx-opacity: 0.75;
+}
+.tubo-destello {
+    -fx-stroke: rgba(255, 255, 255, 0.60);
+    -fx-stroke-width: 1.1;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-stroke-dash-array: 26 20;
+    -fx-fill: transparent;
+}
+
+/* Ruta REAL: azul acero oscuro */
+.tubo-borde.ruta-real   { -fx-stroke: #020a1c; }
+.tubo-cuerpo.ruta-real  { -fx-stroke: #12408a; }
+.tubo-oscuro.ruta-real  { -fx-stroke: #082250; }
+.tubo-rebote.ruta-real  { -fx-stroke: #3d78d0; }
+.tubo-luz.ruta-real     { -fx-stroke: #3f86e0; }
+
+/* Ruta SIMULADA: azul petróleo (para distinguirla de la real) */
+.tubo-borde.ruta-sim   { -fx-stroke: #021218; }
+.tubo-cuerpo.ruta-sim  { -fx-stroke: #0f5f7a; }
+.tubo-oscuro.ruta-sim  { -fx-stroke: #07303f; }
+.tubo-rebote.ruta-sim  { -fx-stroke: #3aa0c0; }
+.tubo-luz.ruta-sim     { -fx-stroke: #3fb0d0; }
+
+/* ---------- Estados alcanzado / origen / destino ---------- */
+.marcador.alcanzado-real {
+    -fx-stroke: #3f86e0;
+    -fx-stroke-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(30, 100, 220, 0.45), 8, 0.3, 0, 0);
+}
+.marcador.alcanzado-sim {
+    -fx-stroke: #3fb0d0;
+    -fx-stroke-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(30, 150, 190, 0.45), 8, 0.3, 0, 0);
+}
+.marcador.origen-real, .marcador.origen-sim {
+    -fx-fill: radial-gradient(center 36% 30%, radius 78%, #8fd8ac 0%, #228a4e 28%, #0d4426 68%, #031208 100%);
+}
+.marcador.destino-real, .marcador.destino-sim {
+    -fx-fill: radial-gradient(center 36% 30%, radius 78%, #e89a90 0%, #a8281c 28%, #52110b 68%, #150403 100%);
+}
+
+/* ---------- Tarjetas de resultado con acento Holo ---------- */
+.panel-lateral .tarjeta-real {
+    -fx-background-color: #1c1c1c;
+    -fx-border-color: #333333 #333333 #333333 #0090e7;
+    -fx-border-width: 1 1 1 4;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+.panel-lateral .tarjeta-sim {
+    -fx-background-color: #1c1c1c;
+    -fx-border-color: #333333 #333333 #333333 #ff0080;
+    -fx-border-width: 1 1 1 4;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+.panel-lateral .texto-real { -fx-text-fill: #4da6ff; -fx-font-size: 13px; }
+.panel-lateral .texto-sim  { -fx-text-fill: #ff66b2; -fx-font-size: 12px; }
+.panel-lateral .distancia-real {
+    -fx-text-fill: #0090e7;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.6), 10, 0.4, 0, 0);
+}
+
+/* ---------- Divisor / Splitter ---------- */
+.divisor-panel { -fx-background-color: #111111; }
+.divisor-panel:hover { -fx-background-color: #0090e7; }
+
+/* ---------- Botones y Campos de Texto con relieve 3D Holo ---------- */
+.panel-lateral .text-field {
+    -fx-background-color: #111111;
+    -fx-text-fill: #f1f1f1;
+    -fx-prompt-text-fill: #666666;
+    -fx-background-radius: 3;
+    -fx-border-color: #333333;
+    -fx-border-radius: 3;
+    -fx-padding: 7 10 7 10;
+}
+.panel-lateral .text-field:focused {
+    -fx-border-color: #0090e7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.3), 6, 0, 0, 0);
+}
+
+.boton {
+    -fx-background-color: linear-gradient(to bottom, #0090e7 0%, #006bb3 100%);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 3;
+    -fx-border-color: #00bfff;
+    -fx-border-radius: 3;
+    -fx-padding: 6 16 6 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0, 0, 1);
+}
+.boton:hover {
+    -fx-background-color: linear-gradient(to bottom, #1faeff, #0080ff);
+}
+.boton:pressed {
+    -fx-background-color: #005588;
+}
+
+.boton-secundario {
+    -fx-background-color: linear-gradient(to bottom, #333333 0%, #222222 100%);
+    -fx-border-color: #444444;
+}
+.boton-secundario:hover {
+    -fx-background-color: linear-gradient(to bottom, #444444, #333333);
+}
+
+/* ---------- Botones Origen / Destino ---------- */
+.boton-ruta {
+    -fx-background-color: linear-gradient(to bottom, #262626 0%, #1a1a1a 100%);
+    -fx-text-fill: #8a8a8a;
+    -fx-font-weight: bold;
+    -fx-background-radius: 3;
+    -fx-border-color: #383838;
+    -fx-border-width: 1 1 1 4;
+    -fx-border-radius: 3;
+    -fx-padding: 7 12 7 12;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0, 0, 1);
+}
+.boton-ruta.boton-origen  { -fx-border-color: #383838 #383838 #383838 #2ecc71; }
+.boton-ruta.boton-destino { -fx-border-color: #383838 #383838 #383838 #e74c3c; }
+.boton-ruta.asignado      { -fx-text-fill: #f1f1f1; }
+.boton-ruta:hover {
+    -fx-background-color: linear-gradient(to bottom, #333333 0%, #232323 100%);
+}
+.boton-ruta:pressed { -fx-background-color: #141414; }
+
+/* ---------- Botón de capa del mapa (estilo Google Maps con look Holo) ---------- */
+.boton-capa {
+    -fx-background-color: #f1f1f1;
+    -fx-background-radius: 13;
+    -fx-padding: 2;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0.15, 0, 3);
+}
+.boton-capa:hover {
+    -fx-background-color: #0090e7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.55), 12, 0.25, 0, 0);
+}
+.boton-capa:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+.boton-capa-sombra {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.72) 100%);
+}
+.boton-capa .boton-capa-texto {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 4, 0.8, 0, 1);
+}
+
+/* ---------- Scrollbars estilo Android Holo ---------- */
+.scroll-panel {
+    -fx-background: #191919;
+    -fx-background-color: #191919;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+.scroll-panel > .viewport { -fx-background-color: #191919; }
+.scroll-panel > .corner   { -fx-background-color: #191919; }
+.scroll-panel .scroll-bar { -fx-background-color: transparent; }
+.scroll-panel .scroll-bar .track {
+    -fx-background-color: #141414;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+}
+.scroll-panel .scroll-bar .thumb {
+    -fx-background-color: #404040;
+    -fx-background-radius: 2;
+    -fx-background-insets: 2;
+}
+.scroll-panel .scroll-bar .thumb:hover   { -fx-background-color: #0090e7; }
+.scroll-panel .scroll-bar .thumb:pressed { -fx-background-color: #00bfff; }
+.scroll-panel .scroll-bar .increment-button,
+.scroll-panel .scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+.scroll-panel .scroll-bar .increment-arrow,
+.scroll-panel .scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: " ";
+}
