@@ -23,7 +23,7 @@ Intento de aplicación del algoritmo de Dijkstra a los diversos puntos accesible
 
 ## Algoritmo
 
-Dijktra
+Dijkstra
 
 
 ##  Desarrollado por
