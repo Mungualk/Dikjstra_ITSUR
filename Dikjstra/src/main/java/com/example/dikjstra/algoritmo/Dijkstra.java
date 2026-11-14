@@ -1,9 +1,16 @@
 package com.example.dikjstra.algoritmo;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 
 public class Dijkstra
 {
-    private Grafo grafo;
+    private final Grafo grafo;
 
     public Dijkstra(Grafo grafo)
     {
@@ -11,136 +18,76 @@ public class Dijkstra
         {
             throw new IllegalArgumentException("El grafo no puede ser null");
         }
-
         this.grafo = grafo;
     }
 
-    private static class Estado
+    /** Entrada de la cola de prioridad: un nodo y la distancia con la que se encontró. */
+    private record Estado(Nodo nodo, double distancia) {}
+
+    public ResRuta calcular(Nodo origen, Nodo destino)
     {
-        Nodo nodo;
-        long dist;
-
-        public Estado(Nodo nodo, long dist)
+        if (origen == null || destino == null
+                || !grafo.contieneNodo(origen) || !grafo.contieneNodo(destino))
         {
-            this.nodo = nodo;
-            this.dist = dist;
-        }
-    }
-
-    public static class calculo_ruta
-    {
-        private List<Nodo> cam;
-        private long dist;
-
-        public calculo_ruta(List<Nodo> cam, long dist)
-        {
-            this.cam = Collections.unmodifiableList(
-                    new ArrayList<>(cam)
-            );
-            this.dist = dist;
+            return ResRuta.sin_Camino();
         }
 
-        public List<Nodo> getCamino()
-        {
-            return cam;
-        }
-
-        public long getDist()
-        {
-            return this.dist;
-        }
-
-        public boolean hayCamino()
-        {
-            return !cam.isEmpty();
-        }
-    }
-
-    // Algoritmo
-    public calculo_ruta calcular(Nodo in, Nodo fin)
-    {
-        if (in == null || fin == null || !grafo.getNodos().contains(in) || !grafo.getNodos().contains(fin))
-        {
-            return new calculo_ruta(Collections.emptyList(), -1);
-        }
-
-        Map<Nodo, Long> distancias_map = new HashMap<>();
-        Map<Nodo, Nodo> nodos_anteriores = new HashMap<>();
-
-        PriorityQueue<Estado> p_c = new PriorityQueue<>(Comparator.comparingLong(estado -> estado.dist));
+        Map<Nodo, Double> distancias = new HashMap<>();
+        Map<Nodo, Nodo> anteriores = new HashMap<>();
+        PriorityQueue<Estado> cola =
+                new PriorityQueue<>(Comparator.comparingDouble(Estado::distancia));
 
         for (Nodo nodo : grafo.getNodos())
         {
-            distancias_map.put(nodo, Long.MAX_VALUE);
+            distancias.put(nodo, Double.POSITIVE_INFINITY);
         }
+        distancias.put(origen, 0.0);
+        cola.add(new Estado(origen, 0.0));
 
-        distancias_map.put(in, 0L);
-
-        p_c.add(new Estado(in, 0));
-
-
-        while (!p_c.isEmpty())
+        while (!cola.isEmpty())
         {
-            Estado estadoActual = p_c.poll();
+            Estado actual = cola.poll();
+            Nodo nodo = actual.nodo();
+            double distancia = actual.distancia();
 
-            Nodo act = estadoActual.nodo;
-            long disAct = estadoActual.dist;
-
-
-            if (disAct != distancias_map.get(act))
+            // Entrada vieja: ya se encontró un camino mejor a este nodo
+            if (distancia > distancias.get(nodo))
             {
                 continue;
             }
 
-            if (act.equals(fin))
+            if (nodo.equals(destino))
             {
                 break;
             }
 
-            for (Map.Entry<Nodo, Integer> arista : grafo.getVecinos(act).entrySet())
+            for (Map.Entry<Nodo, Double> arista : grafo.getVecinos(nodo).entrySet())
             {
                 Nodo vecino = arista.getKey();
-                int peso = arista.getValue();
+                double nuevaDistancia = distancia + arista.getValue();
 
-                long nDis = disAct + peso;
-
-                if (nDis < distancias_map.get(vecino))
+                if (nuevaDistancia < distancias.get(vecino))
                 {
-                    distancias_map.put(vecino, nDis);
-
-                    nodos_anteriores.put(vecino, act);
-
-                    p_c.add(new Estado(vecino, nDis));
+                    distancias.put(vecino, nuevaDistancia);
+                    anteriores.put(vecino, nodo);
+                    cola.add(new Estado(vecino, nuevaDistancia));
                 }
             }
         }
 
-        if (distancias_map.get(fin) == Long.MAX_VALUE)
+        if (Double.isInfinite(distancias.get(destino)))
         {
-            return new calculo_ruta(Collections.emptyList(), -1);
+            return ResRuta.sin_Camino();
         }
 
-        Stack<Nodo> ruta = new Stack<>();
-
-        Nodo actual = fin;
-
-        while (actual != null)
+        // Se reconstruye de atrás hacia adelante y luego se invierte
+        List<Nodo> camino = new ArrayList<>();
+        for (Nodo n = destino; n != null; n = anteriores.get(n))
         {
-            ruta.push(actual);
-
-            if (actual.equals(in))
-            {
-                break;
-            }
-
-            actual = nodos_anteriores.get(actual);
+            camino.add(n);
         }
-
-        List<Nodo> camino = new ArrayList<>(ruta);
-
         Collections.reverse(camino);
 
-        return new calculo_ruta(camino, distancias_map.get(fin));
+        return new ResRuta(camino, distancias.get(destino));
     }
 }
-

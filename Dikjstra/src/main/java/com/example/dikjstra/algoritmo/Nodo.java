@@ -1,47 +1,12 @@
 package com.example.dikjstra.algoritmo;
 
-import java.util.Objects;
-
-public class Nodo
+public record Nodo(String id)
 {
-    private String id;
-
-    public Nodo(String id_p)
+    public Nodo
     {
-        this.id = id_p;
+        if (id == null || id.isBlank())
+        {
+            throw new IllegalArgumentException("El id del nodo no puede estar vacío");
+        }
     }
-
-    public String getId()
-    {
-        return this.id;
-    }
-
-    public void setId(String id_p)
-    {
-        this.id = id_p;
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) return true;
-        if (!(o instanceof Nodo)) return false;
-
-        Nodo nodo = (Nodo) o;
-        return Objects.equals(getId(), nodo.getId());
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(getId());
-    }
-
-    @Override
-    public String toString()
-    {
-        String s = String.format("Nodo{ id=%s }", this.id);
-        return s;
-    }
-
 }
