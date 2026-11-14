@@ -481,7 +481,7 @@ public class HelloApplication extends Application {
         TextFlow tituloPanel = new TextFlow();
         tituloPanel.getStyleClass().add("titulo-panel");
 
-        Text inicio = new Text("Rutas en el ");
+        Text inicio = new Text("Rutas en el ITSUR ");
         inicio.setFill(Color.WHITE);
         inicio.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
