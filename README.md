@@ -26,6 +26,6 @@ Intento de aplicación del algoritmo de Dijkstra a los diversos puntos accesible
 Dijktra
 
 
-## 👨‍💻 Autores
-
-Integrantes del equipo...
+##  Desarrollado por
+- Luis Fernando Calderón
+- Isdair Rodríguez
