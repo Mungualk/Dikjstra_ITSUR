@@ -1,79 +1,67 @@
 package com.example.dikjstra.algoritmo;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class Grafo
 {
-    private Map<Nodo, Map<Nodo, Integer>> ad_l;
+    private final Map<Nodo, Map<Nodo, Double>> adyacencia = new HashMap<>();
 
-    public Grafo()
+    public void agregarNodo(Nodo nodo)
     {
-        this.ad_l = new HashMap<>();
-    }
-
-    public void pucharNodo(Nodo nodo)
-    {
-        if (!(nodo == null)) {
-            if (!this.ad_l.containsKey(nodo)) {
-                ad_l.put(nodo, new HashMap<>());
-            }
-        }
-    }
-
-    public void crearArista(Nodo nodo_1, Nodo nodo_2, int peso)
-    {
-        if(!(nodo_1 == null || nodo_2 == null))
+        if (nodo == null)
         {
-            if((!nodo_1.equals(nodo_2)) && peso >= 0)
-            {
-                if(!this.ad_l.containsKey(nodo_1))
-                {
-                    pucharNodo(nodo_1);
-                }
-                if(!this.ad_l.containsKey(nodo_2))
-                {
-                    pucharNodo(nodo_2);
-                }
-                ad_l.get(nodo_1).put(nodo_2, peso);
-                ad_l.get(nodo_2).put(nodo_1, peso);
-            }
-
+            return;
         }
+        adyacencia.putIfAbsent(nodo, new HashMap<>());
     }
 
-    public Map<Nodo, Integer> getVecinos(Nodo nodo)
+    public void crearArista(Nodo a, Nodo b, double peso)
     {
-        if(!this.ad_l.containsKey(nodo))
+        if (a == null || b == null)
         {
-            return null;
+            throw new IllegalArgumentException("Los nodos de una arista no pueden ser null");
         }
-        else
+        if (a.equals(b))
         {
-            return this.ad_l.get(nodo);
+            throw new IllegalArgumentException("Un nodo no puede conectarse consigo mismo: " + a);
         }
+        if (!(peso >= 0))
+        {
+            throw new IllegalArgumentException("El peso debe ser mayor o igual a 0: " + peso);
+        }
+
+        agregarNodo(a);
+        agregarNodo(b);
+        adyacencia.get(a).put(b, peso);
+        adyacencia.get(b).put(a, peso);
     }
 
-    public Set<Nodo> getNodos ()
+    public boolean contieneNodo(Nodo nodo)
     {
-        Set<Nodo> set = ad_l.keySet();
-        return set;
+        return adyacencia.containsKey(nodo);
     }
 
-    public int getPeso(Nodo nodo_1, Nodo nodo_2)
+    public Map<Nodo, Double> getVecinos(Nodo nodo)
     {
-        Map<Nodo, Integer> vecinos = getVecinos(nodo_1);
-
-        if (vecinos.containsKey(nodo_2))
+        Map<Nodo, Double> vecinos = adyacencia.get(nodo);
+        if (vecinos == null)
         {
-            return vecinos.get(nodo_2);
+            return Collections.emptyMap();
         }
-
-        return -1;
+        return Collections.unmodifiableMap(vecinos);
     }
 
+    public Set<Nodo> getNodos()
+    {
+        return Collections.unmodifiableSet(adyacencia.keySet());
+    }
 
-
+    public double getPeso(Nodo a, Nodo b)
+    {
+        Double peso = getVecinos(a).get(b);
+        return peso == null ? -1 : peso;
+    }
 }

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.scene.shape.Line;
 
 /**
  * Muestra el mapa (imagen, versión CSS o mapa extra) y un marcador clicable sobre cada edificio.
@@ -77,6 +78,10 @@ public class MapaView extends Pane {
     // --- Rutas (la real y la simulada conviven, cada una en su capa) ---
     private final Map<String, Edificio> porId = new HashMap<>();
     private final Group capaRutas = new Group();
+    // --- Conexiones del grafo (solo para depuración) ---capa
+    private final Group capaGrafo = new Group();
+    private final List<Edificio[]> aristasGrafo = new ArrayList<>();
+    private final List<Line> lineasGrafo = new ArrayList<>();
     private final Map<TipoRuta, RutaDibujada> rutas = new EnumMap<>(TipoRuta.class);
     private final Consumer<Edificio> alSeleccionar;
 
@@ -124,8 +129,10 @@ public class MapaView extends Pane {
         fondoCss.setVisible(false);
 
         capaRutas.setMouseTransparent(true);
+        capaGrafo.setMouseTransparent(true);
+        capaGrafo.setVisible(false);              // oculta hasta que se active
 
-        getChildren().addAll(imagen, fondoCss, imagenExtra, capaRutas);
+        getChildren().addAll(imagen, fondoCss, imagenExtra, capaGrafo, capaRutas);
 
         for (Edificio e : edificios) {
             Group g = crearMarcador(e);
@@ -498,6 +505,50 @@ public class MapaView extends Pane {
         return (Circle) marcadores.get(e).getChildren().get(0);
     }
 
+    // ------------------------------------------------------------ conexiones (depuración)
+
+    /** Dibuja una línea por cada conexión {idA, idB}. Ids que no existan se ignoran. */
+    public void setConexiones(String[][] conexiones) {
+        capaGrafo.getChildren().clear();
+        aristasGrafo.clear();
+        lineasGrafo.clear();
+
+        for (String[] par : conexiones) {
+            Edificio a = porId.get(par[0]);
+            Edificio b = porId.get(par[1]);
+            if (a == null || b == null) continue;
+
+            Line l = new Line();
+            l.setStroke(Color.web("#ffd54a"));
+            l.setStrokeWidth(2);
+            l.setOpacity(0.85);
+            l.getStrokeDashArray().addAll(8.0, 5.0);   // punteada
+            l.setMouseTransparent(true);
+
+            aristasGrafo.add(new Edificio[]{a, b});
+            lineasGrafo.add(l);
+            capaGrafo.getChildren().add(l);
+        }
+        actualizarGrafo();
+    }
+
+    public void mostrarGrafo(boolean visible) {
+        capaGrafo.setVisible(visible);
+    }
+
+    /** Recoloca cada línea según la escala, el zoom y el desplazamiento actuales. */
+    private void actualizarGrafo() {
+        for (int i = 0; i < lineasGrafo.size(); i++) {
+            Edificio a = aristasGrafo.get(i)[0];
+            Edificio b = aristasGrafo.get(i)[1];
+            Line l = lineasGrafo.get(i);
+            l.setStartX(offsetX + a.x() * escala);
+            l.setStartY(offsetY + a.y() * escala);
+            l.setEndX(offsetX + b.x() * escala);
+            l.setEndY(offsetY + b.y() * escala);
+        }
+    }
+
     // ------------------------------------------------------------ marcadores
 
     private Group crearMarcador(Edificio e) {
@@ -731,5 +782,6 @@ public class MapaView extends Pane {
         });
 
         rutas.values().forEach(this::actualizarLinea);
+        actualizarGrafo();
     }
 }

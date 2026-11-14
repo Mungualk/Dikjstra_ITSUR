@@ -14,9 +14,16 @@
 .panel-lateral .subtitulo { -fx-font-size: 14px; -fx-text-fill: #a6a6a6; }
 /* Título del panel: texto grande con la línea azul Holo debajo */
 .panel-lateral .titulo-panel {
-    -fx-font-size: 20px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
+    -fx-padding: 0 0 8 2;
+    -fx-border-color: transparent transparent #0090e7 transparent;
+    -fx-border-width: 0 0 2 0;
+
+}
+
+.panel-lateral .titulo-panel {
     -fx-padding: 0 0 8 2;
     -fx-border-color: transparent transparent #0090e7 transparent;
     -fx-border-width: 0 0 2 0;
@@ -452,6 +459,47 @@
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 4, 0.8, 0, 1);
+}
+
+/* ---------- Borde sutil alrededor del mapa (azul Holo que se desvanece hacia dentro) ---------- */
+.marco-mapa {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(0, 144, 231, 0.40), rgba(0, 144, 231, 0.16), rgba(0, 144, 231, 0.06);
+    -fx-border-insets: 0, 1, 2;
+    -fx-border-width: 1, 1, 1;
+}
+
+/* ---------- Botón "Rutas" (conexiones de la red), hermano del botón de capa ---------- */
+.boton-rutas-contenido {
+    -fx-background-color: linear-gradient(to bottom, #2a2a2a 0%, #101010 100%);
+}
+.boton-capa.activo {
+    -fx-background-color: #0090e7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 144, 231, 0.65), 12, 0.3, 0, 0);
+}
+.boton-capa.activo:hover { -fx-background-color: #1faeff; }
+
+.rutas-icono-linea {
+    -fx-stroke: #ffd54a;
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 5 3;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-fill: transparent;
+    -fx-opacity: 0.45;
+}
+.rutas-icono-punto { -fx-fill: #f1f1f1; }
+.boton-capa.activo .rutas-icono-linea { -fx-opacity: 1; }
+
+/* lucecita de estado: apagada / encendida */
+.rutas-led {
+    -fx-fill: #3a3a3a;
+    -fx-stroke: #000000;
+    -fx-stroke-width: 0.5;
+}
+.boton-capa.activo .rutas-led {
+    -fx-fill: #2ecc71;
+    -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.9), 6, 0.5, 0, 0);
 }
 
 /* ---------- Scrollbars estilo Android Holo ---------- */

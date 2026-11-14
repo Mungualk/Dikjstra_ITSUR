@@ -1,16 +1,5 @@
 package com.example.dikjstra;
 
-/**
- * Un edificio / punto de referencia del mapa.
- * x e y están en PÍXELES DE LA IMAGEN ORIGINAL (itsur.jpeg), no de la pantalla.
- *
- * Uso:
- *   new Edificio("C", "Biblioteca", "Horario 8-18", 700, 450)
- *       .conColor("#2ecc71")
- *       .conIcono("/ICONOS/libro.png")
- *       .conImagen("/IMAGENES/biblioteca.jpg")   // foto que se ve en la tarjeta al hacer clic
- *       .conTamano(90, 50);
- */
 public class Edificio {
     private final String id;
     private final String nombre;

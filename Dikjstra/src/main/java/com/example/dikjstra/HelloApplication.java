@@ -33,6 +33,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Polyline;
+import javafx.scene.Group;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -41,6 +44,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
+
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
+import javafx.util.Duration;
 
 public class HelloApplication extends Application {
 
@@ -101,13 +119,21 @@ public class HelloApplication extends Application {
     private Image miniaturaPlano;      // /MAPAS/miniatura_plano.png
     private final Tooltip tooltipCapa = new Tooltip();
 
+    // Botón "Rutas": muestra/oculta las conexiones de la red encima del mapa (satélite, plano o mapa extra)
+    private boolean conexionesActivas = false;
+    private final StackPane contenidoRutas = new StackPane();
+    private final StackPane botonRutas = new StackPane(contenidoRutas);
+    private final Circle ledRutas = new Circle(4);                 // lucecita: verde = encendido
+    private final Tooltip tooltipRutas = new Tooltip();
+
     // Easter egg
     private boolean eggActivo = false;             // true = el mapa extra está disponible en el botón de capa
     private Image imagenExtra;                     // el mapa extra cargado (null mientras el egg está apagado)
     private final StringBuilder tecleado = new StringBuilder();
     private long ultimaTecla = 0;
 
-    private MapaView mapa;                          // null si la imagen no se pudo cargar
+    private MapaView mapa;
+    private RedRutas red;                           // el grafo + Dijkstra (null si no cargó el mapa)// null si la imagen no se pudo cargar
 
     @Override
     public void start(Stage stage) {
@@ -144,16 +170,16 @@ public class HelloApplication extends Application {
     private List<Edificio> crearEdificios() {
         return List.of(
                 new Edificio("A", "Biblioteca", "Edificio dedicado a la concentracion y relajacion tanto para alumnos como profesores, contando con un amplio catalogo de libros, cubiculos, salsas de reuiniones y computadoras para uso libre.", 390, 200)
-                        .conImagen("/IMAGENES/biblioteca.jpg").conIcono("/ICONOS/biblioteca.png"),   // <- ejemplo: pon aquí tu foto
-                new Edificio("B", "Vinculacion", "Oficinas donde se maneja la venta de libros de ingles, inscripciones a los niveles etc. .", 200, 300).conIcono("/ICONOS/Vincula.png"),
-                new Edificio("C", "Estacionamiento", "Espacio libre con espacios limitados bajo un techo de lamina. El estacionamiento mayormente conformado para brindar espacio a motocicletas y un breve esapcio para los coches.", 800, 250).conIcono("/ICONOS/estacionamiento.png"),
-                new Edificio("D", "Auditorio abandonado", " Obra negra de lo que deberia ser un auditorio imponente, que quedo en nada por razones que al parecer no les gusta mencionar XD.", 175, 710).conIcono("/ICONOS/obranegra.png"),
-                new Edificio("E", "Edificio B", "Edficio donde facultades: Sistemas, ambiental, electronica toman sus clases, con la particularidad de que su inmueble esta descuidado y maltratado.", 710, 495).conIcono("/ICONOS/EdiB.png"),
+                        .conImagen("/IMAGENES/Biblioteca.jpg").conIcono("/ICONOS/biblioteca.png"),   // <- ejemplo: pon aquí tu foto
+                new Edificio("B", "Vinculacion", "Oficinas donde se maneja la venta de libros de ingles, inscripciones a los niveles etc. .", 200, 300).conIcono("/ICONOS/Vincula.png").conImagen("/IMAGENES/Vinculacion.jpg"),
+                new Edificio("C", "Estacionamiento", "Espacio libre con espacios limitados bajo un techo de lamina. El estacionamiento mayormente conformado para brindar espacio a motocicletas y un breve esapcio para los coches.", 800, 250).conIcono("/ICONOS/estacionamiento.png").conImagen("/IMAGENES/Estacionamiento.jpg"),
+                new Edificio("D", "Auditorio abandonado", " Obra negra de lo que deberia ser un auditorio imponente, que quedo en nada por razones que al parecer no les gusta mencionar XD.", 175, 710).conIcono("/ICONOS/obranegra.png").conImagen("/IMAGENES/Auditoriodeshet.jpg"),
+                new Edificio("E", "Edificio B", "Edficio donde facultades: Sistemas, ambiental, electronica toman sus clases, con la particularidad de que su inmueble esta descuidado y maltratado.", 710, 495).conIcono("/ICONOS/EdiB.png").conImagen("/IMAGENES/Edificio_b.jpg"),
                 new Edificio("F", "Edificio A", "Edifcio donde las facultades de industrial y principalmente Gestion toman sus clases, tambien se concentran aqui la mayoria de las clases de ingles. Este siendo el primer edifcio construido en el ITSUR.", 475, 450).conIcono("/ICONOS/EdiA.png").conImagen("/IMAGENES/EA.jpeg"),
                 new Edificio("G", "Edificio E", "Edificio donde las siguientes facultades: Ambiental, Mecanica, Industrial, Electronica toman sus clase, siendo este el ultimo edificio construido en el ITSUR, contando con su laboratorio para experimentos quimicos y su equipo respectiv, su taller de electricidad y mecanica etc.", 400, 680).conIcono("/ICONOS/EdiE.png"),
-                new Edificio("H", "TICS", "Edificio que contiene el centro de computo, un sitio de uso libre de computo, espacios para los distintos laboratorios de clase de computo para las distintas facultades.", 640, 682).conIcono("/ICONOS/tics.png"),
-                new Edificio("I", "Cafeteria", "Punto de Reuinion y quiza el lugar mas concurrido por los estudiantes dia con dia, venta de comida, debidas, botanas etc. zona de conversaciones y ocio.", 480, 795).conIcono("/ICONOS/cafeteria.png"),
-                new Edificio("J", "Palapas", "Salones que conforman las famosas palapas, sitio para los alumnos integrantes de la rondalla y aficionados al deporte con el gimnasio del ITSUR", 370, 350).conIcono("/ICONOS/palapas.png"),
+                new Edificio("H", "TICS", "Edificio que contiene el centro de computo, un sitio de uso libre de computo, espacios para los distintos laboratorios de clase de computo para las distintas facultades.", 640, 682).conIcono("/ICONOS/tics.png").conImagen("/IMAGENES/tics.jpg"),
+                new Edificio("I", "Cafeteria", "Punto de Reuinion y quiza el lugar mas concurrido por los estudiantes dia con dia, venta de comida, debidas, botanas etc. zona de conversaciones y ocio.", 480, 795).conIcono("/ICONOS/cafeteria.png").conImagen("/IMAGENES/Cafeteria.jpg"),
+                new Edificio("J", "Palapas", "Salones que conforman las famosas palapas, sitio para los alumnos integrantes de la rondalla y aficionados al deporte con el gimnasio del ITSUR", 370, 350).conIcono("/ICONOS/palapas.png").conImagen("/IMAGENES/Palapas.jpg"),
                 new Edificio("K", "Entrada principal", "Entrada al ITSUR, la cual controla la entrada y salida de miles de alumnos cada dia para ir asus clases o regresar a sus hogares.", 520, 150).conIcono("/ICONOS/entrada.png"),
                 new Edificio("L", "Cabaña", "Cabaña de la facultad de gastronomia, donde se realizan sus practicas de cocina tradicional y diversas tecnicas locales.", 130, 500).conIcono("/ICONOS/caba.png"),
                 new Edificio("M", "Chancha de Futbol", "Cancha de Futbol, utilizada por los alumnos y maestros en eventos recreativos. Tambien es la zona de practica para los alumnos del club y seleccion de Tocho Bandera.", 975, 650).conIcono("/ICONOS/canchas.png"),
@@ -359,12 +385,21 @@ public class HelloApplication extends Application {
     }
 
     /** Se llama cada vez que cambia el origen o el destino. Aquí conectas tu Dijkstra. */
+    /** Se llama cada vez que cambia el origen o el destino. */
     private void alCambiarOrigenDestino() {
-        if (origen != null && destino != null) {
-            // Ejemplo:
-            // List<String> camino = tuDijkstra(origen.id(), destino.id());
-            // mostrarRutaReal(camino, metros);
+        if (red == null || origen == null || destino == null) {
+            limpiarRutaReal();
+            return;
         }
+
+        Optional<RedRutas.Ruta> ruta = red.calcular(origen.id(), destino.id());
+        if (ruta.isEmpty()) {
+            limpiarRutaReal();
+            lblRuta.setText("No hay camino entre " + origen.nombre() + " y " + destino.nombre());
+            return;
+        }
+
+        mostrarRutaReal(ruta.get().ids(), ruta.get().metros());
     }
 
     /** Pequeño "no" visual: el botón se mueve de lado a lado. */
@@ -378,16 +413,25 @@ public class HelloApplication extends Application {
         ).play();
     }
 
+
     private VBox crearPanelLateral() {
         // --- Ruta real ---
         Label titulo = new Label("Ruta más corta");
         titulo.getStyleClass().add("titulo");
+
         lblRuta.setWrapText(true);
         lblRuta.getStyleClass().add("texto-real");
         lblDistancia.getStyleClass().add("distancia-real");
         ocultar(lblDistancia);
 
-        VBox tarjetaReal = new VBox(8, titulo, crearBotonesOrigenDestino(), lblRuta, lblDistancia);
+        VBox tarjetaReal = new VBox(
+                8,
+                titulo,
+                crearBotonesOrigenDestino(),
+                lblRuta,
+                lblDistancia
+        );
+
         tarjetaReal.getStyleClass().addAll("tarjeta", "tarjeta-real");
         tarjetaReal.setPadding(new Insets(12));
 
@@ -395,43 +439,78 @@ public class HelloApplication extends Application {
         lblNombre.getStyleClass().add("nombre-edificio");
         lblDescripcion.setWrapText(true);
         lblCoordenadas.getStyleClass().add("coordenadas");
-        ocultar(lblCoordenadas);                 // solo aparece en modo mapa CSS (ver MOSTRAR_COORDENADAS)
-        // Foto con marco: se ajusta al ancho de la tarjeta (con alto máximo) y queda centrada
+        ocultar(lblCoordenadas);
+
+        // Foto con marco
         imgEdificio.setPreserveRatio(true);
         imgEdificio.setSmooth(true);
-        imgEdificio.fitWidthProperty().bind(tarjetaInfo.widthProperty().subtract(42));   // 24 padding tarjeta + 18 del marco
+
+        imgEdificio.fitWidthProperty().bind(
+                tarjetaInfo.widthProperty().subtract(42)
+        );
+
         imgEdificio.setFitHeight(ALTO_MAX_IMAGEN);
 
         brilloFoto.getStyleClass().add("brillo-foto");
         brilloFoto.setMouseTransparent(true);
-        brilloFoto.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);   // que cubra toda la foto
+        brilloFoto.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
         marcoFoto.getStyleClass().add("marco-foto");
         marco.getStyleClass().add("marco-imagen");
         marco.setMaxWidth(Region.USE_PREF_SIZE);
+
         marcoImagen.setAlignment(Pos.CENTER);
         ocultar(marcoImagen);
 
-        tarjetaInfo.getChildren().addAll(marcoImagen, lblNombre, lblCoordenadas, lblDescripcion);
+        tarjetaInfo.getChildren().addAll(
+                marcoImagen,
+                lblNombre,
+                lblCoordenadas,
+                lblDescripcion
+        );
+
         tarjetaInfo.getStyleClass().add("tarjeta");
         tarjetaInfo.setPadding(new Insets(12));
         ocultar(tarjetaInfo);
 
-        // Espacio flexible: empuja el contenido hacia arriba
+        // --- Espacio flexible ---
         Region espacio = new Region();
         VBox.setVgrow(espacio, Priority.ALWAYS);
 
-        // Título del panel
-        Label tituloPanel = new Label("User View");
+        // --- Título del panel ---
+        TextFlow tituloPanel = new TextFlow();
         tituloPanel.getStyleClass().add("titulo-panel");
-        tituloPanel.setMaxWidth(Double.MAX_VALUE);     // que la línea azul de abajo cubra todo el ancho
 
-        VBox panel = new VBox(12, tituloPanel, tarjetaReal, crearSimuladorRuta(), new Separator(),
-                tarjetaInfo, espacio);
+        Text inicio = new Text("Rutas en el ");
+        inicio.setFill(Color.WHITE);
+        inicio.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        tituloPanel.getChildren().add(inicio);
+
+        Text fin = new Text(" (Algoritmo de Dijkstra)");
+        fin.setFill(Color.WHITE);
+        fin.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        tituloPanel.getChildren().add(fin);
+        tituloPanel.setMaxWidth(Double.MAX_VALUE);
+
+        // --- Panel completo ---
+        VBox panel = new VBox(
+                12,
+                tituloPanel,
+                tarjetaReal,
+                new Separator(),
+                tarjetaInfo,
+                espacio
+        );
+
         panel.setPadding(new Insets(14));
         panel.setMinWidth(ANCHO_MIN_PANEL);
         panel.getStyleClass().add("panel-lateral");
+
         return panel;
     }
+
 
     /**
      * Pone el panel dentro de un ScrollPane: barra vertical y horizontal que aparecen solo cuando
@@ -639,6 +718,89 @@ public class HelloApplication extends Application {
         }
     }
 
+    // ===================================================================== botón "Rutas"
+
+    /** Barra de capas: el botón de mapa y el botón "Rutas" (conexiones de la red), uno junto al otro. */
+    private Node crearBarraCapas(Image satelite) {
+        HBox barra = new HBox(10, crearBotonCapa(satelite), crearBotonRutas());
+        barra.setAlignment(Pos.BOTTOM_LEFT);
+        barra.setPickOnBounds(false);                                   // el espacio entre botones no bloquea el mapa
+        barra.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        return barra;
+    }
+
+    /**
+     * Botón hermano del de capa. Enciende/apaga el trazado de las conexiones (lo que antes hacía el
+     * checkbox "Mostrar conexiones"). Funciona sobre cualquier mapa, no lo cambia.
+     */
+    private Node crearBotonRutas() {
+        // Icono: una red de puntos unida por una línea punteada
+        double[][] puntos = {{10, 50}, {28, 26}, {46, 40}, {66, 14}};
+        Polyline lineas = new Polyline();
+        for (double[] p : puntos) lineas.getPoints().addAll(p[0], p[1]);
+        lineas.getStyleClass().add("rutas-icono-linea");
+
+        Group icono = new Group(lineas);
+        for (double[] p : puntos) {
+            Circle punto = new Circle(p[0], p[1], 4);
+            punto.getStyleClass().add("rutas-icono-punto");
+            icono.getChildren().add(punto);
+        }
+        icono.setTranslateY(-10);                                        // deja espacio para el texto de abajo
+
+        Label etiqueta = new Label("Rutas");
+        etiqueta.getStyleClass().add("boton-capa-texto");
+        etiqueta.setMouseTransparent(true);
+        StackPane.setAlignment(etiqueta, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(etiqueta, new Insets(0, 0, 7, 0));
+
+        ledRutas.getStyleClass().add("rutas-led");
+        StackPane.setAlignment(ledRutas, Pos.TOP_RIGHT);
+        StackPane.setMargin(ledRutas, new Insets(9, 9, 0, 0));
+
+        contenidoRutas.getChildren().addAll(icono, etiqueta, ledRutas);
+        contenidoRutas.getStyleClass().add("boton-rutas-contenido");
+        contenidoRutas.setMinSize(TAM_MINIATURA, TAM_MINIATURA);
+        contenidoRutas.setPrefSize(TAM_MINIATURA, TAM_MINIATURA);
+        contenidoRutas.setMaxSize(TAM_MINIATURA, TAM_MINIATURA);
+        Rectangle recorte = new Rectangle(TAM_MINIATURA, TAM_MINIATURA);   // mismas esquinas que el botón de capa
+        recorte.setArcWidth(22);
+        recorte.setArcHeight(22);
+        contenidoRutas.setClip(recorte);
+
+        botonRutas.getStyleClass().addAll("boton-capa", "boton-rutas");
+        botonRutas.setMaxSize(TAM_MINIATURA + 4, TAM_MINIATURA + 4);
+        botonRutas.setOnMouseClicked(ev -> {
+            if (ev.getButton() == javafx.scene.input.MouseButton.PRIMARY) {
+                alternarConexiones();
+                ev.consume();
+            }
+        });
+
+        tooltipRutas.setShowDelay(Duration.millis(300));
+        Tooltip.install(botonRutas, tooltipRutas);
+        actualizarBotonRutas();
+        return botonRutas;
+    }
+
+    /** Enciende o apaga las conexiones sobre el mapa que se esté viendo. */
+    private void alternarConexiones() {
+        conexionesActivas = !conexionesActivas;
+        if (mapa != null) mapa.mostrarGrafo(conexionesActivas);
+        actualizarBotonRutas();
+
+        FadeTransition fade = new FadeTransition(Duration.millis(220), contenidoRutas);
+        fade.setFromValue(0.35);
+        fade.setToValue(1);
+        fade.play();
+    }
+
+    private void actualizarBotonRutas() {
+        botonRutas.getStyleClass().remove("activo");
+        if (conexionesActivas) botonRutas.getStyleClass().add("activo");
+        tooltipRutas.setText(conexionesActivas ? "Ocultar las conexiones de la red" : "Mostrar las conexiones de la red");
+    }
+
     // ===================================================================== easter egg
 
     /**
@@ -748,13 +910,29 @@ public class HelloApplication extends Application {
             return zona;
         }
 
-        mapa = new MapaView(imagen, crearEdificios(), this::mostrarInfo);
+        List<Edificio> edificios = crearEdificios();
+        red = new RedRutas(edificios, Conexiones.TODAS);
+        mapa = new MapaView(imagen, edificios, this::mostrarInfo);
+
+        mapa.setConexiones(Conexiones.TODAS);
+
+        List<String> aislados = red.idsInalcanzables();
+        if (!aislados.isEmpty()) {
+            System.err.println("Nodos sin conexión a la red: " + aislados);
+        }
         zona.getChildren().add(mapa);
 
-        Node boton = crearBotonCapa(imagen);
-        StackPane.setAlignment(boton, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(boton, new Insets(0, 0, 16, 16));
-        zona.getChildren().add(boton);
+        // Borde sutil alrededor de todo el mapa (no recibe clics)
+        Region marcoMapa = new Region();
+        marcoMapa.getStyleClass().add("marco-mapa");
+        marcoMapa.setMouseTransparent(true);
+        marcoMapa.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        zona.getChildren().add(marcoMapa);
+
+        Node barra = crearBarraCapas(imagen);
+        StackPane.setAlignment(barra, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(barra, new Insets(0, 0, 16, 16));
+        zona.getChildren().add(barra);
         return zona;
     }
 }
